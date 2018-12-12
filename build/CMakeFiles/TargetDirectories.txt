@@ -1,0 +1,3 @@
+/home/hollan/dev/geosim/build/CMakeFiles/rebuild_cache.dir
+/home/hollan/dev/geosim/build/CMakeFiles/geosim.dir
+/home/hollan/dev/geosim/build/CMakeFiles/edit_cache.dir
