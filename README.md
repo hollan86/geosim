@@ -11,6 +11,6 @@ I use DEM datasets from these sites
 
 ## Data Processing
 - I use QGIS software to reproject datasets from Geographical CS to respective Projected CS based on the datasets UTM zone.
-- I use this this (http://spatialreference.org/ref/) to lookup utm zones.
+- I use this (http://spatialreference.org/ref/) to lookup utm zones.
 
 
