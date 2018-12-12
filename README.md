@@ -9,5 +9,8 @@ I use DEM datasets from these sites
 - https://earthexplorer.usgs.gov
 - https://www.eorc.jaxa.jp/ALOS/en/aw3d30/data/index.htm
 
+## Data Processing
+- I use QGIS software to reproject datasets from Geographical CS to respective Projected CS based on the datasets UTM zone.
+- I use this this (http://spatialreference.org/ref/) to lookup utm zones.
 
 
