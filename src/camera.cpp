@@ -8,7 +8,7 @@ camera::camera()
     angularSpeedY = 40;
     direction = glm::vec3(0, 0, 1);
     motionvector = glm::vec3(0, 0, 0);
-    position = glm::vec3(0, 0, -10);
+    position = glm::vec3(0, 17000, -10);
     angleX = 0;
     angleY = 0;
     up = glm::vec3(0, 1, 0);
@@ -121,7 +121,7 @@ void camera::resetVerticalRotation()
 void camera::flight(float dir)
 {
     // flightVel = motionSpeed *dir;
-    position += (100.0f * dir) * up;
+    position += (1000.0f * dir) * up;
 }
 
 void camera::resetFlightSpeed()

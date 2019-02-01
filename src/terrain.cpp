@@ -19,7 +19,7 @@ void terrain::setup()
 	origin.y = y;
 	end.x = x + xres * (width);
 	end.y = y - yres * (height);
-	char* test = &projection[0];
+	const char * test = &projection[0];
 	sr.importFromWkt(&test);
 	createMesh(vecs, xres, yres, max, indicies, vertexes);
 
@@ -67,6 +67,9 @@ void terrain::render(glm::mat4& view, glm::mat4& projection)
 
 	glm::mat4 mvp = projection * view;
 	Renderer.setUniformMatrix4x4("mvp", mvp);
+	//Renderer.setUniformMatrix4x4("proj", projection);
+	//Renderer.setUniformMatrix4x4("view", view);
+
 	Renderer.setUniformMatrix4x4("model", model);
 	Renderer.setUniformFloat("Max", max);
 	Renderer.setUniformFloat("Min", min);

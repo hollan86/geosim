@@ -1,13 +1,9 @@
-#if defined(__APPLE__) || defined(MACOSX)
-#include <OpenGL/gl3.h>
-#else //linux as default
-#include <GL/glew.h>
-
-#endif
-
-
 #ifndef _BUFFER_H_
 #define _BUFFER_H_
+
+#include "glad/glad.h"
+#include <GLFW/glfw3.h>
+
 class buffer
 {
 

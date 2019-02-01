@@ -6,6 +6,10 @@ layout (location = 2) in vec3 Normal;
 
 out vec2 silly;
 uniform mat4 mvp;
+
+uniform mat4 proj;
+uniform mat4 view;
+
 uniform mat4 model;
 uniform float Max;
 uniform float Min;
@@ -27,6 +31,7 @@ void main(void)
    //silly.x = 0;
 
    gl_Position = mvp*vec4(p,1);
+   //gl_Position = proj * view * vec4(p,1);
    TexCoord0 = TexCoord;
    Normal0 = (model*vec4(Normal,0.0)).xyz;
    WorldPos0 = vec4((model*vec4(p,1.0)).xyz,1.0); 

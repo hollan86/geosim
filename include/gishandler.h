@@ -1,15 +1,5 @@
-//#include "includes.h"
-#include <vector>
-#include <string>
-#include <iostream>
-
-#if defined(__APPLE__) || defined(MACOSX)
-#include <OpenGL/gl3.h>
-#else //linux as default
-#include <GL/glew.h>
-
-#endif
-
+#include "glad/glad.h"
+#include <GLFW/glfw3.h>
 //#define GLM_FORCE_RADIANS
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
@@ -29,6 +19,9 @@
 
 #ifndef _GISHANDLER_H_
 #define _GISHANDLER_H_
+
+#include <iostream>
+
 using namespace std;
 using namespace glm;
 struct Vertex

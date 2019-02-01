@@ -3,13 +3,8 @@
 #include <iostream>
 #include <iterator>
 
-#if defined(__APPLE__) || defined(MACOSX)
-#include <OpenGL/gl3.h>
-#else //linux as default
-#include <GL/glew.h>
-#include <GL/gl.h>
-#include <GL/glext.h>
-#endif
+#include "glad/glad.h"
+#include <GLFW/glfw3.h>
 
 #ifndef _SHADER_H_
 #define _SHADER_H_

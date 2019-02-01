@@ -7,11 +7,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#if defined(__APPLE__) || defined(MACOSX)
-#include <OpenGL/gl3.h>
-#else //linux as default
-#include <GL/glew.h>
-#endif
+#include "glad/glad.h"
+#include <GLFW/glfw3.h>
 
 
 using namespace std;

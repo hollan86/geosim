@@ -1,7 +1,7 @@
 # Geosim
 ## Description
 A 3D render of geographic terrains using gdal library (www.gdal.org). Below is a render of the Grand Canyon
-![Sample screenshot](https://github.com/hollan86/geosim/blob/master/grandcanyon1.png)
+![Sample screenshot](https://github.com/hollan86/geosim/blob/master/grandcanyon.png)
 
 ## Datasets
 I use DEM datasets from these sites

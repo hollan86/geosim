@@ -50,6 +50,8 @@ void framerenderer::setup()
 	Renderer.addShader(GL_FRAGMENT_SHADER, "../shaders/frame.frag");
 	cout << Renderer.compile() << endl;
 	cout << Renderer.link() << endl;
+
+	//Quad vertices
 	float verts[12] = {-1.0, -1.0,
 	                   1.0, -1.0,
 	                   1.0, 1.0,

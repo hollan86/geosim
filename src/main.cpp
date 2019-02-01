@@ -4,24 +4,8 @@
 
 #include <AssetManager.h>
 
-//#include <SDL2/SDL.h>
-
-
-
-
-#if defined(__APPLE__) || defined(MACOSX)
-#include <OpenGL/gl3.h>
-#include <OpenGL/GLU.h>
-#else //linux as default
-#include <GL/glew.h>
-//#include <GL/gl.h>
+#include "glad/glad.h"
 #include <GLFW/glfw3.h>
-
-#include <GL/glu.h>
-//#include <GL/glext.h>
-//#define GL_GLEXT_PROTOTYPES 1
-
-#endif
 
 //#define GL3_PROTOTYPES 1
 #include <renderer.h>
@@ -47,12 +31,13 @@ using namespace chrono;
 float Vertices[9] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0};
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-    glViewport(0, 0, width, height);
-}
+//void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+//{
+//    glViewport(0, 0, width*2, height*2);
+//    fr.setScreenDims(SCREEN_WIDTH*2, SCREEN_HEIGHT*2);
+//}
 
-string ErrorString(GLenum error)
+const char * ErrorString(GLenum error)
 {
 	if (error == GL_INVALID_ENUM)
 	{
@@ -119,6 +104,12 @@ camera Camera;
 
 framerenderer fr;
 
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+    fr.setScreenDims(width, height);
+}
+
 string fname = "../DATA/grandcanyon_ar.tif";
 terrain Terrain(fname);
 
@@ -144,7 +135,7 @@ int main(int argc, char** argv)
 	AssetManager::SetAppPath(appPath);
 
 
-	current = high_resolution_clock::now();
+//	current = high_resolution_clock::now();
 	high_resolution_clock::time_point past = high_resolution_clock::now();
 
 	//Start up SDL and create window
@@ -194,6 +185,7 @@ int main(int argc, char** argv)
 			// 	HandleEvents(e, time_span.count());
 			// }
 
+//            std::cout << "Counts: " << time_span.count() << "\n";
 			processInput(window);
 
 
@@ -250,6 +242,7 @@ bool init()
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
 		//Create window
 		window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "GeoSim",NULL, NULL);
@@ -270,27 +263,6 @@ bool init()
 
 			// glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-			auto t = glGetError();
-			cout << ErrorString(t) << endl;
-
-			t = glGetError();
-			cout << ErrorString(t) << endl;
-
-			#if !defined(__APPLE__) && !defined(MACOSX)
-			cout << glewGetString(GLEW_VERSION) << endl;
-			glewExperimental = GL_TRUE;
-
-			auto status = glewInit();
-			//Check for error
-			if (status != GLEW_OK)
-			{
-				//std::cerr << "GLEW Error: " << glewGetErrorString(status) << "\n";
-				success = false;
-			}
-			#endif
-			
-			t = glGetError();
-			cout << ErrorString(t) << endl;
 			//Initialize OpenGL
 			if ( !initGL() )
 			{
@@ -301,7 +273,7 @@ bool init()
 			//cout << glGetString(GL_VERSION) << endl;
 			cout << "GUFFER SUCCESS: " << GBuffer::Init(SCREEN_WIDTH, SCREEN_HEIGHT) << endl;
 			fr.setup();
-			fr.setScreenDims(SCREEN_WIDTH, SCREEN_HEIGHT);
+			fr.setScreenDims(SCREEN_WIDTH*2, SCREEN_HEIGHT*2);
 		}
 	}
 
@@ -313,25 +285,26 @@ bool init()
 
 bool initGL()
 {
-	GLenum error = GL_NO_ERROR;
-	bool success = true;
-	//Initialize clear color
-	// glClearColor( 0.f, 0.f, 1.f, 1.f );
+	if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		return false;
+	}
+
 	int bufferWidth, bufferHeight;
 	glfwGetFramebufferSize(window,&bufferWidth,&bufferHeight);
 
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-	// glViewport(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
-	glViewport(0,0,bufferWidth,bufferHeight);
+	glViewport(0,0,SCREEN_WIDTH*2,SCREEN_HEIGHT*2);
+	//glViewport(0,0,bufferWidth*,bufferWidth*);
 
-	error = glGetError();
-	if ( error != GL_NO_ERROR )
-	{
-		printf( "INIT STAGE: Error initializing OpenGL! %s\n", ErrorString( error ) );
-		success = false;
-	}
+	//NOTE! For OSX with retina display, framebuffer size should be set twice as much as window size!
+//	glViewport(0,0,SCR_WIDTH*2,SCR_HEIGHT*2);
+	//configure global opengl state
+	//glEnable(GL_DEPTH_TEST);
+	//setting polygon mode
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	return success;
+	return true;
 }
 
 void update(float dt)
@@ -392,27 +365,27 @@ void handleKeys( GLFWwindow* window, int key, int scancode, int action, int mods
 {
 	if (key == GLFW_KEY_Q && action == GLFW_PRESS)
 	{
-		Camera.rotateX(1 * deltaTime);
+		Camera.rotateX(1 * time_span.count());
 	}
 	if (key == GLFW_KEY_E && action == GLFW_PRESS)
 	{
-		Camera.rotateX(-1 * deltaTime);
+		Camera.rotateX(-1 * time_span.count());
 	}
 	if (key == GLFW_KEY_A && action == GLFW_PRESS)
 	{
-		Camera.strafe(-10 * deltaTime);
+		Camera.strafe(-10 * time_span.count());
 	}
 	if (key == GLFW_KEY_S && action == GLFW_PRESS)
 	{
-		Camera.translate(-10 * deltaTime);
+		Camera.translate(-10 * time_span.count());
 	}
 	if (key == GLFW_KEY_D && action == GLFW_PRESS)
 	{
-		Camera.strafe(10 * deltaTime);
+		Camera.strafe(10 * time_span.count());
 	}
 	if (key == GLFW_KEY_W && action == GLFW_PRESS)
 	{
-		Camera.translate(10 * deltaTime);
+		Camera.translate(10 * time_span.count());
 	}
 	if (key == GLFW_KEY_Y && action == GLFW_PRESS)
 	{
@@ -424,19 +397,19 @@ void handleKeys( GLFWwindow* window, int key, int scancode, int action, int mods
 	}
 	if (key == GLFW_KEY_Z && action == GLFW_PRESS)
 	{
-		Camera.rotateY(-1 * deltaTime);
+		Camera.rotateY(-1 * time_span.count());
 	}
 	if (key == GLFW_KEY_X && action == GLFW_PRESS)
 	{
-		Camera.rotateY(1 * deltaTime);
+		Camera.rotateY(1 * time_span.count());
 	}
 	if (key == GLFW_KEY_R && action == GLFW_PRESS)
 	{
-		Camera.flight(1 * deltaTime);
+		Camera.flight(1 * time_span.count());
 	}
 	if (key == GLFW_KEY_F && action == GLFW_PRESS)
 	{
-		Camera.flight(-1 * deltaTime);
+		Camera.flight(-1 * time_span.count());
 	}
 	if (key == GLFW_KEY_W && action == GLFW_RELEASE)
 	{

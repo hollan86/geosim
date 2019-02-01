@@ -1,14 +1,11 @@
-#include <iostream>
 using namespace std;
-#if defined(__APPLE__) || defined(MACOSX)
-#include <OpenGL/gl3.h>
-#else //linux as default
-#include <GL/glew.h>
-
-#endif
 #include <stdlib.h>
 #ifndef _GBUFFER_H_
 #define _GBUFFER_H_
+
+#include "glad/glad.h"
+#include <GLFW/glfw3.h>
+#include <iostream>
 
 #define ARRAY_SIZE_IN_ELEMENTS(a) (sizeof(a)/sizeof(a[0]))
 
