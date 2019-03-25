@@ -14,7 +14,8 @@
 //#include <triangle.h>
 #include <gishandler.h>
 #include <vector>
-#include <camera.h>
+//#include <camera.h>
+#include <camera.hpp>
 #include <chrono>
 #include <terrain.h>
 #include <gbuffer.h>
@@ -27,8 +28,11 @@ const int SCREEN_HEIGHT = 600;
 using namespace std;
 using namespace chrono;
 
+Camera camera(SCREEN_WIDTH,SCREEN_HEIGHT);
 
 float Vertices[9] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0};
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
 //void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -100,15 +104,11 @@ GLFWwindow* window;
 //Render flag
 bool gRenderQuad = true;
 
-camera Camera;
+//camera Camera;
+
 
 framerenderer fr;
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-    glViewport(0, 0, width, height);
-    fr.setScreenDims(width, height);
-}
 
 string fname = "../DATA/grandcanyon_ar.tif";
 terrain Terrain(fname);
@@ -118,8 +118,8 @@ GLuint VaoId;
 high_resolution_clock::time_point current;
 duration<double> time_span;
 
-float lastFrame;
-float deltaTime;
+//float lastFrame;
+//float deltaTime;
 
 
 bool quit;
@@ -160,14 +160,14 @@ int main(int argc, char** argv)
 		//While application is running
 
 		//init time frames
-		lastFrame = 0.0f;
-		deltaTime = 0.0f;
+//		lastFrame = 0.0f;
+//		deltaTime = 0.0f;
 		
 		while ( !glfwWindowShouldClose(window) )
 		{
-			float currentFrame = glfwGetTime();
-			deltaTime = currentFrame - lastFrame;
-			lastFrame = currentFrame;
+//			float currentFrame = glfwGetTime();
+//			deltaTime = currentFrame - lastFrame;
+//			lastFrame = currentFrame;
 
 			current = high_resolution_clock::now();
 			// // duration<double> time_span = duration_cast<duration<double>>(current - past);
@@ -259,9 +259,15 @@ bool init()
 
 			//Registering callbacks
 			glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-			glfwSetKeyCallback(window, handleKeys);
 
-			// glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			//NOTE: HANDLE KEYS REMOVED!!!
+//			glfwSetKeyCallback(window, handleKeys);
+
+            glfwSetCursorPosCallback(window, mouse_callback);
+            glfwSetScrollCallback(window, scroll_callback);
+
+            //tell GLFW to capture our mouse
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 			//Initialize OpenGL
 			if ( !initGL() )
@@ -271,7 +277,7 @@ bool init()
 			}
 
 			//cout << glGetString(GL_VERSION) << endl;
-			cout << "GUFFER SUCCESS: " << GBuffer::Init(SCREEN_WIDTH, SCREEN_HEIGHT) << endl;
+			cout << "GUFFER SUCCESS: " << GBuffer::Init(SCREEN_WIDTH*2, SCREEN_HEIGHT*2) << endl;
 			fr.setup();
 			fr.setScreenDims(SCREEN_WIDTH*2, SCREEN_HEIGHT*2);
 		}
@@ -310,14 +316,16 @@ bool initGL()
 void update(float dt)
 {
 	//No per frame update needed
-	Camera.update();
+//	Camera.update();
+	camera.update();
 }
 
 void render()
 {
-	fr.SetCameraPos(Camera.getPos());
-	glm::mat4 view = Camera.getView();
-	glm::mat4 projection = Camera.getProjection();
+//	fr.SetCameraPos(Camera.getPos());
+    fr.SetCameraPos(camera.getPos());
+	glm::mat4 view = camera.getView();
+	glm::mat4 projection = camera.getProjection();
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	// glClearColor( 0.f, 0.f, 0.5f, 0.f );
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -351,90 +359,123 @@ void close()
 	glfwTerminate();
 }
 
+//void processInput(GLFWwindow *window)
+//{
+//    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+//	{
+//		glfwSetWindowShouldClose(window, true);
+//	}
+//}
+
+
+
+//void handleKeys( GLFWwindow* window, int key, int scancode, int action, int mods )
+//{
+//	if (key == GLFW_KEY_Q && action == GLFW_PRESS)
+//	{
+//		Camera.rotateX(1 * time_span.count());
+//	}
+//	if (key == GLFW_KEY_E && action == GLFW_PRESS)
+//	{
+//		Camera.rotateX(-1 * time_span.count());
+//	}
+//	if (key == GLFW_KEY_A && action == GLFW_PRESS)
+//	{
+//		Camera.strafe(-100 * time_span.count());
+//	}
+//	if (key == GLFW_KEY_S && action == GLFW_PRESS)
+//	{
+//		Camera.translate(-100 * time_span.count());
+//	}
+//	if (key == GLFW_KEY_D && action == GLFW_PRESS)
+//	{
+//		Camera.strafe(100 * time_span.count());
+//	}
+//	if (key == GLFW_KEY_W && action == GLFW_PRESS)
+//	{
+//		Camera.translate(100 * time_span.count());
+//	}
+//	if (key == GLFW_KEY_Y && action == GLFW_PRESS)
+//	{
+//		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+//	}
+//	if (key == GLFW_KEY_U && action == GLFW_PRESS)
+//	{
+//		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+//	}
+//	if (key == GLFW_KEY_Z && action == GLFW_PRESS)
+//	{
+//		Camera.rotateY(-1 * time_span.count());
+//	}
+//	if (key == GLFW_KEY_X && action == GLFW_PRESS)
+//	{
+//		Camera.rotateY(1 * time_span.count());
+//	}
+//	if (key == GLFW_KEY_R && action == GLFW_PRESS)
+//	{
+//		Camera.flight(1 * time_span.count());
+//	}
+//	if (key == GLFW_KEY_F && action == GLFW_PRESS)
+//	{
+//		Camera.flight(-1 * time_span.count());
+//	}
+//	if (key == GLFW_KEY_W && action == GLFW_RELEASE)
+//	{
+//		cout << "W RELEASED" << endl;
+//		Camera.resetVerticalSpeed();
+//	}
+//	if (key == GLFW_KEY_S && action == GLFW_RELEASE)
+//	{
+//		cout << "S RELEASED" << endl;
+//		Camera.resetVerticalSpeed();
+//	}
+//	if ((key == GLFW_KEY_A || key == GLFW_KEY_D) && action == GLFW_RELEASE)
+//	{
+//		Camera.resetHorizontalSpeed();
+//	}
+//	if ((key == GLFW_KEY_Q || key == GLFW_KEY_E) && action == GLFW_RELEASE)
+//	{
+//		Camera.resetHorizontalRotation();
+//	}
+//	if ((key == GLFW_KEY_Z || key == GLFW_KEY_X) && action == GLFW_RELEASE)
+//	{
+//		Camera.resetVerticalRotation();
+//	}
+//	if ((key == GLFW_KEY_R || key == GLFW_KEY_F) && action == GLFW_RELEASE)
+//	{
+//		Camera.resetFlightSpeed();
+//	}
+//}
+
 void processInput(GLFWwindow *window)
 {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-	{
-		glfwSetWindowShouldClose(window, true);
-	}
+        glfwSetWindowShouldClose(window, true);
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camera.moveFoward(time_span.count()*100);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camera.moveBackward(time_span.count()*100);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camera.moveLeft(time_span.count()*100);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera.moveRight(time_span.count()*100);
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+        camera.moveUp(time_span.count()*1000);
+    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
+        camera.moveDown(time_span.count()*1000);
 }
 
-
-
-void handleKeys( GLFWwindow* window, int key, int scancode, int action, int mods )
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-	if (key == GLFW_KEY_Q && action == GLFW_PRESS)
-	{
-		Camera.rotateX(1 * time_span.count());
-	}
-	if (key == GLFW_KEY_E && action == GLFW_PRESS)
-	{
-		Camera.rotateX(-1 * time_span.count());
-	}
-	if (key == GLFW_KEY_A && action == GLFW_PRESS)
-	{
-		Camera.strafe(-10 * time_span.count());
-	}
-	if (key == GLFW_KEY_S && action == GLFW_PRESS)
-	{
-		Camera.translate(-10 * time_span.count());
-	}
-	if (key == GLFW_KEY_D && action == GLFW_PRESS)
-	{
-		Camera.strafe(10 * time_span.count());
-	}
-	if (key == GLFW_KEY_W && action == GLFW_PRESS)
-	{
-		Camera.translate(10 * time_span.count());
-	}
-	if (key == GLFW_KEY_Y && action == GLFW_PRESS)
-	{
-		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-	}
-	if (key == GLFW_KEY_U && action == GLFW_PRESS)
-	{
-		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-	}
-	if (key == GLFW_KEY_Z && action == GLFW_PRESS)
-	{
-		Camera.rotateY(-1 * time_span.count());
-	}
-	if (key == GLFW_KEY_X && action == GLFW_PRESS)
-	{
-		Camera.rotateY(1 * time_span.count());
-	}
-	if (key == GLFW_KEY_R && action == GLFW_PRESS)
-	{
-		Camera.flight(1 * time_span.count());
-	}
-	if (key == GLFW_KEY_F && action == GLFW_PRESS)
-	{
-		Camera.flight(-1 * time_span.count());
-	}
-	if (key == GLFW_KEY_W && action == GLFW_RELEASE)
-	{
-		cout << "W RELEASED" << endl;
-		Camera.resetVerticalSpeed();
-	}
-	if (key == GLFW_KEY_S && action == GLFW_RELEASE)
-	{
-		cout << "S RELEASED" << endl;
-		Camera.resetVerticalSpeed();
-	}
-	if ((key == GLFW_KEY_A || key == GLFW_KEY_D) && action == GLFW_RELEASE)
-	{
-		Camera.resetHorizontalSpeed();
-	}
-	if ((key == GLFW_KEY_Q || key == GLFW_KEY_E) && action == GLFW_RELEASE)
-	{
-		Camera.resetHorizontalRotation();
-	}
-	if ((key == GLFW_KEY_Z || key == GLFW_KEY_X) && action == GLFW_RELEASE)
-	{
-		Camera.resetVerticalRotation();
-	}
-	if ((key == GLFW_KEY_R || key == GLFW_KEY_F) && action == GLFW_RELEASE)
-	{
-		Camera.resetFlightSpeed();
-	}
+    glViewport(0, 0, width, height);
+    fr.setScreenDims(width, height);
+}
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    camera.updateCameraDirection(2*xpos,2*ypos);
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    camera.zoom(yoffset);
 }

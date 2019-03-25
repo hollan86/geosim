@@ -1,130 +1,125 @@
-#include "camera.h"
+#include "camera.hpp"
+#include <iostream>
 
-camera::camera()
+Camera::Camera(int width, int height)
 {
-    maxAngleX = 75;
-    maxAngleY = 75;
-    angularSpeedX = 40;
-    angularSpeedY = 40;
-    direction = glm::vec3(0, 0, 1);
-    motionvector = glm::vec3(0, 0, 0);
-    position = glm::vec3(0, 17000, -10);
-    angleX = 0;
-    angleY = 0;
-    up = glm::vec3(0, 1, 0);
-    motionSpeed = 100;
-    projection = glm::perspective<float>(
-                     glm::radians(45.0f),         // The horizontal Field of View, in degrees : the amount of "zoom". Think "camera lens". Usually between 90° (extra wide) and 30° (quite zoomed in)
-                     4.0f / 3.0f, // Aspect Ratio. Depends on the size of your window. Notice that 4/3 == 800/600 == 1280/960, sounds familiar ?
-                     0.9f,        // Near clipping plane. Keep as big as possible, or you'll get precision issues.
-                     100000.0f       // Far clipping plane. Keep as little as possible.
-                 );
+//    cameraPos = glm::vec3(0.0f, 0.0f,  3.0f);
+    cameraPos = glm::vec3(0, 17000, -10);
+    cameraFront = glm::vec3(0, 0, 1);
+    //cameraUp = glm::vec3(0.0f, 1.0f,  0.0f);
+    worldUp = glm::vec3(0, 1,  0);
+    cameraSpeed = 100.0f;
+    fieldOfView = 45.0f;
+    view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+    projection = glm::perspective<float>(glm::radians(fieldOfView), 4.0f / 3.0f, 0.9f, 100000.0f);
+    lastX = (float) width / 2.0;
+    lastY = (float) height / 2.0;
+    mouseSensitivity = 0.1f;
+    pitch = 0.0f;
+    yaw = -90.0f;
+    firstMouse = true;
+    screenWidth = width;
+    screenHeight = height;
+//    updateCameraVectors();
     update();
-
-    maxForwardVel = 10;
-    minForwardVel = -10;
-    maxSideVel = 10;
-    minSideVel = -10;
-    maxFlightVel = 10;
-    minFlightVel = -10;
-    sideVel = flightVel = forwardVel = 0;
 }
-
-glm::mat4 camera::getProjection()
-{
-    return projection;
-}
-
-glm::mat4 camera::getView()
+glm::mat4 Camera::getView()
 {
     return view;
 }
-void camera::orbitX(float dir)
+glm::mat4 Camera::getProjection()
 {
-
-    angleX += dir * angularSpeedX;
-    glm::vec3 d = glm::rotate(direction, angleX, up);
-    d = glm::rotate(d, angleY, glm::cross(d, up));
-    if (dir > 0)
-        motionvector -= motionSpeed * glm::cross(up, glm::normalize(d));
-    else
-        motionvector += motionSpeed * glm::cross(up, d);
+    return projection;
 }
-
-void camera::rotateX(float dir)
+glm::vec3& Camera::getPos()
 {
-    angleX = dir * angularSpeedX;
+    return cameraPos;
 }
-
-void camera::rotateY(float dir)
+void Camera::setCameraSpeed(float speed)
 {
-    angleY = dir * angularSpeedY;
+    cameraSpeed = speed;
 }
-void camera::applyRotation()
+void Camera::moveFoward(float dt)
 {
-    direction = glm::rotate(direction, angleX, up);
-    direction = glm::rotate(direction, angleY, glm::cross(direction, up));
+    std::cout << "W pressed\n";
+    cameraPos += (cameraSpeed * dt) * cameraFront;
 }
-
-void camera::translate(float dir)
+void Camera::moveBackward(float dt)
 {
-    // forwardVel = motionSpeed * dir;
-    // forwardVel = glm::clamp(forwardVel, minForwardVel, maxForwardVel);
-    //hollan
-    position += (100.0f * dir) * direction;
-    // cameraPos += (cameraSpeed * dt) * cameraFront;
+    std::cout << "S pressed\n";
+    cameraPos -= (cameraSpeed * dt) * cameraFront;
 }
-
-void camera::strafe(float dir)
+void Camera::moveRight(float dt)
 {
-    // sideVel = motionSpeed * dir;
-    // sideVel = glm::clamp(sideVel, minSideVel, maxSideVel);
-
-    position += glm::normalize(glm::cross(direction, up)) * (100.0f * dir);
+    std::cout << "D pressed\n";
+    cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * (cameraSpeed * dt);
 }
-
-void camera::update()
+void Camera::moveLeft(float dt)
 {
-    applyRotation();
-    motionvector += forwardVel * direction;
-    motionvector += sideVel * glm::cross(up, direction);
-    motionvector += flightVel * up;
-    position += motionvector;
-    //std::cout << position.x << " " << position.y << " " << position.z << std::endl;
-    view = glm::lookAt( position, //Eye Position
-                        position + direction, //Focus point
-                        up); //Positive Y is up
-    
-    motionvector = glm::vec3(0, 0, 0);
+    std::cout << "A pressed\n";
+//    cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * (cameraSpeed * dt);
+    cameraPos -= cameraRight * (cameraSpeed * dt);
 }
-
-void camera::resetHorizontalSpeed()
+void Camera::moveUp(float dt)
 {
-    sideVel = 0;
+    std::cout << "R pressed\n";
+    cameraPos += (cameraSpeed * dt) * cameraUp;
 }
-
-void camera::resetVerticalSpeed()
+void Camera::moveDown(float dt)
 {
-    forwardVel = 0;
+    std::cout << "F pressed\n";
+    cameraPos -= (cameraSpeed * dt) * cameraUp;
 }
-
-void camera::resetHorizontalRotation()
+void Camera::update()
 {
-    angleX = 0;
+    updateCameraVectors();
+    view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+
+//    projection = glm::perspective(glm::radians(fieldOfView), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
 }
-
-void camera::resetVerticalRotation()
+void Camera::updateCameraDirection(double xpos, double ypos)
 {
-    angleY = 0;
+    if(firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
+    lastX = xpos;
+    lastY = ypos;
+
+    xoffset *= mouseSensitivity;
+    yoffset *= mouseSensitivity;
+
+    yaw += xoffset;
+    pitch += yoffset;
+
+    if(pitch > 89.0f)
+        pitch =  89.0f;
+    if(pitch < -89.0f)
+        pitch = -89.0f;
+
+    updateCameraVectors();
+//    glm::vec3 front;
+//    front.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));
+//    front.y = sin(glm::radians(pitch));
+//    front.z = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
+//    cameraFront = glm::normalize(front);
+    std::cout<<glm::to_string(cameraFront)<<std::endl;
 }
-
-void camera::flight(float dir)
+void Camera::zoom(double yoffset)
 {
-    // flightVel = motionSpeed *dir;
-    position += (1000.0f * dir) * up;
+    if(fieldOfView >= 1.0f && fieldOfView <= 45.0f)
+        fieldOfView -= yoffset;
+    if(fieldOfView <= 1.0f)
+        fieldOfView = 1.0f;
+    if(fieldOfView >= 45.0f)
+        fieldOfView = 45.0f;
 }
-
-void camera::resetFlightSpeed()
+Camera::~Camera()
 {
-    flightVel = 0;
+    //Do nothing for now
 }
